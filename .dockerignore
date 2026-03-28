@@ -1,0 +1,6 @@
+.git
+__pycache__
+*.pyc
+k8s/
+LICENSE
+.dockerignore

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>k8smate</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>k8smate</h1>
+    <button id="refresh-btn" title="Refresh">Refresh</button>
+  </header>
+
+  <main>
+    <div id="pod-list"></div>
+  </main>
+
+  <!-- Pod detail modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title"></h2>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-tabs">
+        <button class="tab active" data-tab="describe">Describe</button>
+        <button class="tab" data-tab="logs">Logs</button>
+      </div>
+      <pre id="modal-body"></pre>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: k8smate
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: k8smate
+  namespace: k8smate
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: k8smate
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "services", "namespaces"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "daemonsets", "statefulsets"]
+    verbs: ["get", "list", "watch", "patch", "update"]
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps"]
+    verbs: ["create", "patch", "update", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "daemonsets", "statefulsets"]
+    verbs: ["create", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "create", "patch", "update", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: k8smate
+subjects:
+  - kind: ServiceAccount
+    name: k8smate
+    namespace: k8smate
+roleRef:
+  kind: ClusterRole
+  name: k8smate
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8smate
+  namespace: k8smate
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: k8smate
+  template:
+    metadata:
+      labels:
+        app: k8smate
+    spec:
+      serviceAccountName: k8smate
+      containers:
+        - name: k8smate
+          image: ghcr.io/rcbilson/k8smate:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: K8SMATE_CONFIG_REPO
+              value: /config
+          volumeMounts:
+            - name: config-repo
+              mountPath: /config
+      volumes:
+        - name: config-repo
+          hostPath:
+            path: /home/richard/config/k3s
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8smate
+  namespace: k8smate
+spec:
+  selector:
+    app: k8smate
+  ports:
+    - port: 80
+      targetPort: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: k8smate
+  namespace: k8smate
+spec:
+  ingressClassName: tailscale
+  defaultBackend:
+    service:
+      name: k8smate
+      port:
+        number: 80

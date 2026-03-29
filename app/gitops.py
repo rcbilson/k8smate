@@ -19,8 +19,9 @@ def pull(repo_path: str) -> str:
     return _run_git('pull', '--ff-only', cwd=repo_path)
 
 
-def add_and_commit(repo_path: str, files: list[str], message: str) -> str:
-    """Stage files and commit."""
+def add_commit_push(repo_path: str, files: list[str], message: str) -> str:
+    """Stage files, commit, and push."""
     for f in files:
         _run_git('add', f, cwd=repo_path)
-    return _run_git('commit', '-m', message, cwd=repo_path)
+    _run_git('commit', '-m', message, cwd=repo_path)
+    return _run_git('push', cwd=repo_path, timeout=60)

@@ -207,15 +207,15 @@ def upgrade_image(req: UpgradeRequest):
     with open(filepath, 'w') as f:
         yaml.dump_all(docs, f, default_flow_style=False, sort_keys=False)
 
-    # Git commit and push
+    # Git add and commit
     try:
-        gitops.add_commit_push(
+        gitops.add_and_commit(
             str(repo),
             [req.file],
             f"k8smate: upgrade {req.containerName} to {new_digest[:19]}",
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Git push failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Git commit failed: {e}")
 
     # Apply to cluster
     try:
